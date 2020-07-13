@@ -19,7 +19,7 @@ The following options from the `devcontainer.json` are supported:
 You can install the devcontainer script by either [downloading the script](https://raw.githubusercontent.com/BorisWilhelms/devcontainer/main/devcontainer.sh) and place it into a folder in you $PATH variable or you can use the following command to download and install the script.
 
 ```
-sudo (curl -s https://raw.githubusercontent.com/BorisWilhelms/devcontainer/main/devcontainer.sh > /usr/local/bin/devcontainer)
+sudo sh -c 'curl -s https://raw.githubusercontent.com/BorisWilhelms/devcontainer/main/devcontainer.sh > /usr/local/bin/devcontainer && chmod +x /usr/local/bin/devcontainer'
 ```
 ### Prerequisites
 The script uses [jq](https://stedolan.github.io/jq/) to parse the `devcontainer.json`. Therefore it must be installed.
