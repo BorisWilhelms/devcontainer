@@ -1,3 +1,4 @@
+# Run devcontainer outside of Visual Studio Code
 Are you also a big fan of [Visual Studio Devcontainer](https://code.visualstudio.com/docs/remote/containers)? Do you also sometimes want to just run the devcontainer outside of Visual Studio Code? Me also! That is why I have created this simple bash script. The script parses the `devcontainer.json` file and runs the docker container outside of Visual Studio Code.
 
 Example
