@@ -1,15 +1,20 @@
 #!/bin/bash
-OPTIND=1
-DEBUG=0
 
-while getopts "d" opt; do
+if ! [ -x "$(command -v jq)" ]; then
+    printf "\x1B[31m[ERROR] jq is not installed.\x1B[0m\n"
+    exit 1
+fi
+OPTIND=1
+VERBOSE=0
+
+while getopts "v" opt; do
     case ${opt} in
-        d ) DEBUG=1 ;;
+        v ) VERBOSE=1 ;;
     esac
 done
 
 debug() {
-    if [ $DEBUG == 1 ]; then
+    if [ $VERBOSE == 1 ]; then
         printf "\x1B[33m[DEBUG] ${1}\x1B[0m\n"
     fi
 }
@@ -22,7 +27,7 @@ CONFIG_DIR=./.devcontainer
 debug "CONFIG_DIR: ${CONFIG_DIR}"
 CONFIG_FILE=devcontainer.json
 debug "CONFIG_FILE: ${CONFIG_FILE}"
-if [ ! -e "$CONFIG_DIR/$CONFIG_FILE" ]; then
+if ! [ -e "$CONFIG_DIR/$CONFIG_FILE" ]; then
     echo "Folder contains no devcontainer configuration"
     exit
 fi
@@ -34,14 +39,14 @@ cd $CONFIG_DIR
 
 DOCKER_FILE=$(readlink -f $(echo $CONFIG | jq -r .dockerFile))
 debug "DOCKER_FILE: ${DOCKER_FILE}"
-if [ ! -e $DOCKER_FILE ]; then
+if ! [ -e $DOCKER_FILE ]; then
     echo "Can not find dockerfile ${DOCKER_FILE}"
     exit
 fi
 
 REMOTE_USER=$(echo $CONFIG | jq -r .remoteUser)
 debug "REMOTE_USER: ${REMOTE_USER}"
-if [ ! -z "$REMOTE_USER" ]; then
+if ! [ -z "$REMOTE_USER" ]; then
     REMOTE_USER="-u ${REMOTE_USER}"
 fi
 
