@@ -37,7 +37,11 @@ debug "CONFIG: \n${CONFIG}"
 
 cd $CONFIG_DIR
 
-DOCKER_FILE=$(readlink -f $(echo $CONFIG | jq -r .dockerFile))
+DOCKER_FILE=$(echo $CONFIG | jq -r .dockerFile)
+if [ "$DOCKER_FILE" == "null" ]; then 
+    DOCKER_FILE=$(echo $CONFIG | jq -r .build.dockerfile)
+fi
+DOCKER_FILE=$(readlink -f $DOCKER_FILE)
 debug "DOCKER_FILE: ${DOCKER_FILE}"
 if ! [ -e $DOCKER_FILE ]; then
     echo "Can not find dockerfile ${DOCKER_FILE}"
@@ -46,9 +50,12 @@ fi
 
 REMOTE_USER=$(echo $CONFIG | jq -r .remoteUser)
 debug "REMOTE_USER: ${REMOTE_USER}"
-if ! [ -z "$REMOTE_USER" ]; then
+if ! [ "$REMOTE_USER" == "null" ]; then
     REMOTE_USER="-u ${REMOTE_USER}"
 fi
+
+ARGS=$(echo $CONFIG | jq -r '.build.args | to_entries? | map("--build-arg \(.key)=\"\(.value)\"")? | join(" ")')
+debug "ARGS: ${ARGS}"
 
 SHELL=$(echo $CONFIG | jq -r '.settings."terminal.integrated.shell.linux"')
 debug "SHELL: ${SHELL}"
@@ -66,7 +73,7 @@ MOUNT="${MOUNT} --mount type=bind,source=${WORKSPACE},target=${WORK_DIR}"
 debug "MOUNT: ${MOUNT}"
 
 echo "Building and starting container"
-DOCKER_IMAGE_HASH=$(docker build -q -f $DOCKER_FILE .)
+DOCKER_IMAGE_HASH=$(docker build -f $DOCKER_FILE $ARGS .)
 debug "DOCKER_IMAGE_HASH: ${DOCKER_IMAGE_HASH}"
 
 docker run -it $REMOTE_USER $PORTS $ENVS $MOUNT -w $WORK_DIR $DOCKER_IMAGE_HASH $SHELL
