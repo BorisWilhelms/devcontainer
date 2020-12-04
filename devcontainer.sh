@@ -19,7 +19,7 @@ debug() {
     fi
 }
 
-WORKSPACE=`pwd`
+WORKSPACE=${1:-`pwd`}
 CURRENT_DIR=${PWD##*/}
 echo "Using workspace ${WORKSPACE}"
 
@@ -59,7 +59,7 @@ debug "PORTS: ${PORTS}"
 ENVS=$(echo $CONFIG | jq -r '.remoteEnv | to_entries? | map("-e \(.key)=\(.value)")? | join(" ")')
 debug "ENVS: ${ENVS}"
 
-WORK_DIR="/workspaces/${CURRENT_DIR}"
+WORK_DIR="/workspace"
 debug "WORK_DIR: ${WORK_DIR}"
 
 MOUNT="${MOUNT} --mount type=bind,source=${WORKSPACE},target=${WORK_DIR}"
