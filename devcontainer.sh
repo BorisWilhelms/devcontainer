@@ -4,7 +4,17 @@ if ! [ -x "$(command -v jq)" ]; then
     printf "\x1B[31m[ERROR] jq is not installed.\x1B[0m\n"
     exit 1
 fi
-OPTIND=1
+
+if ! [ -x "$(command -v sed)" ]; then
+    printf "\x1B[31m[ERROR] sed is not installed (only GNU sed works).\x1B[0m\n"
+    exit 1
+fi
+
+if ! sed --version | grep "sed (GNU sed)" &>/dev/null; then
+    printf "\x1B[31m[ERROR] GNU sed is not installed.\x1B[0m\n"
+    exit 1
+fi
+
 VERBOSE=0
 
 while getopts "v" opt; do
@@ -32,12 +42,29 @@ if ! [ -e "$CONFIG_DIR/$CONFIG_FILE" ]; then
     exit
 fi
 
-CONFIG=$(cat $CONFIG_DIR/$CONFIG_FILE | grep -v //)
+CONFIG="$(cat "$CONFIG_DIR/$CONFIG_FILE")"
+
+# Replacing variables in the config file
+localWorkspaceFolderBasename="$(basename "$(realpath "$CONFIG_DIR/..")")"
+# shellcheck disable=SC2001
+CONFIG="$(echo "$CONFIG" | sed "s#\${localWorkspaceFolderBasename}#$localWorkspaceFolderBasename#g")"
+
+localWorkspaceFolder="$(dirname "$localWorkspaceFolderBasename")"
+# shellcheck disable=SC2001
+CONFIG="$(echo "$CONFIG" | sed "s#\${localWorkspaceFolder}#$localWorkspaceFolder#g")"
+
+# Remove trailing comma's with sed
+CONFIG=$(echo "$CONFIG" | grep -v // | sed -Ez 's#,([[:space:]]*[]}])#\1#gm')
 debug "CONFIG: \n${CONFIG}"
 
-cd $CONFIG_DIR
 
-DOCKER_FILE=$(echo $CONFIG | jq -r .dockerFile)
+if [[ ! -d "$CONFIG_DIR" ]]; then
+    echo "Config dir '$CONFIG_DIR' does not exist!" >&2
+    exit 7
+fi
+
+cd "$CONFIG_DIR" || return
+
 if [ "$DOCKER_FILE" == "null" ]; then 
     DOCKER_FILE=$(echo $CONFIG | jq -r .build.dockerfile)
 fi
