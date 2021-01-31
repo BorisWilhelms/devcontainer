@@ -24,11 +24,8 @@ sudo sh -c 'curl -s https://raw.githubusercontent.com/BorisWilhelms/devcontainer
 ```
 ## Prerequisites
 The script uses [jq](https://stedolan.github.io/jq/) to parse the `devcontainer.json`. Therefore it must be installed.
-Also GNU sed need to be installed
+Also `GNU sed` needs to be installed
 
-
-## Known issues
-- Since `jq` expects a valid JSON file, all possible JSON error (e.g. `,` without following properties) has to be corrected. The script will strip all comments (`//`) to make it more valid.
 
 
 ## Development
