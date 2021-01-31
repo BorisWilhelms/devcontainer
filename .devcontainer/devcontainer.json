@@ -1,0 +1,20 @@
+{
+    "name": "${localWorkspaceFolderBasename}",
+    "dockerFile": "./Dockerfile",
+    "remoteUser": "vscode",
+    "mounts": [
+        "source=${localWorkspaceFolderBasename}-extensions,target=/home/vscode/.vscode-server/extensions,type=volume,consistency=cached",
+        // keep the trailing comma below so it can be used in tests
+        "source=${localWorkspaceFolderBasename}-extensions-insiders,target=/home/vscode/.vscode-server-insiders/extensions,type=volume,consistency=cached",
+    ],
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+    "updateRemoteUserUID": true,
+    "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+    },
+    "workspaceFolder": "/workspace",
+    "extensions": [
+       "bpruitt-goddard.mermaid-markdown-syntax-highlighting",
+       "exiasr.hadolint",
+    ],
+}
