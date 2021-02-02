@@ -164,10 +164,14 @@ PGID=$(id -g)
 docker run -it $DOCKER_OPTS $PORTS $ENVS $MOUNT -w "$WORK_DIR" "$DOCKER_TAG" "$SHELL" -c "\
 if [[ '$REMOTE_USER' != '' ]] && command -v usermod &>/dev/null; \
 then \
-    sudo usermod -u $PUID $REMOTE_USER && \
-    sudo groupmod -g $PGID $REMOTE_USER && \
-    sudo passwd -d $REMOTE_USER && \
-    sudo chown $REMOTE_USER:$REMOTE_USER -R ~$REMOTE_USER $WORK_DIR && \
+    sudo=''
+    if [[ "$(stat -f -c '%u' $(which sudo))" = '0' ]]; then
+        sudo=sudo
+    fi
+    \$sudo usermod -u $PUID $REMOTE_USER && \
+    \$sudo groupmod -g $PGID $REMOTE_USER && \
+    \$sudo passwd -d $REMOTE_USER && \
+    \$sudo chown $REMOTE_USER:$REMOTE_USER -R ~$REMOTE_USER $WORK_DIR && \
     su $REMOTE_USER -s $SHELL; \
 else \
     $SHELL; \
