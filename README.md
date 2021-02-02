@@ -5,6 +5,15 @@ Example
 
 ![Example](example.gif)
 
+## Usage
+
+Running the `.devcontainer.json` file in this repository can be done using the following command:
+```
+.devcontainer.sh -v --docker-opts="-u root"
+```
+The `--docker-opts` are necessary because by default the vscode image runs as vscode user (id 1000)
+
+
 ## How does it work?
 The script can be run in any workspace the contains the `.devcontainer` configuration folder. On start, it parses several different options from the `devcontainer.json` file, builds the dockerfile, and starts the container. The script mounts the current folder into the container into the `/workspaces/$currentfolder` path. Same as Visual Studio Code does. 
 
