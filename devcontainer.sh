@@ -165,7 +165,7 @@ docker run -it $DOCKER_OPTS $PORTS $ENVS $MOUNT -w "$WORK_DIR" "$DOCKER_TAG" "$S
 if [[ '$REMOTE_USER' != '' ]] && command -v usermod &>/dev/null; \
 then \
     sudo=''
-    if [[ \"$(stat -f -c '%u' \"$(which sudo)\")\" = '0' ]]; then
+    if [[ \"$(stat -f -c '%u' "$(which sudo)")\" = '0' ]]; then
         sudo=sudo
     fi
     \$sudo usermod -u $PUID $REMOTE_USER && \
