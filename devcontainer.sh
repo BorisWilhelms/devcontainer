@@ -157,15 +157,16 @@ fi
 
 debug "DOCKER_TAG: ${DOCKER_TAG}"
 
+set -e
 PUID=$(id -u)
 PGID=$(id -g)
 
 # shellcheck disable=SC2086
 docker run -it $DOCKER_OPTS $PORTS $ENVS $MOUNT -w "$WORK_DIR" "$DOCKER_TAG" "$SHELL" -c "\
-if [[ '$REMOTE_USER' != '' ]] && command -v usermod &>/dev/null; \
+if [ '$REMOTE_USER' != '' ] && command -v usermod &>/dev/null; \
 then \
     sudo=''
-    if [[ \"$(stat -f -c '%u' "$(which sudo)")\" = '0' ]]; then
+    if [ \"$(stat -f -c '%u' "$(which sudo)")\" = '0' ]; then
         sudo=sudo
     fi
     \$sudo usermod -u $PUID $REMOTE_USER && \
