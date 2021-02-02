@@ -148,6 +148,12 @@ echo "Building and starting container"
 DOCKER_TAG=$(echo "$DOCKER_FILE" | md5sum - | awk '{ print $1 }')
 # shellcheck disable=SC2086
 docker build -f "$DOCKER_FILE" -t "$DOCKER_TAG" $ARGS .
+build_status=$?
+
+if [[ $build_status -ne 0 ]]; then
+    echo "Building docker image failed..." >&2
+    exit 7
+fi
 
 debug "DOCKER_TAG: ${DOCKER_TAG}"
 
