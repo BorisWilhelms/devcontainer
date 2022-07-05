@@ -28,8 +28,15 @@ debug "CONFIG_DIR: ${CONFIG_DIR}"
 CONFIG_FILE=devcontainer.json
 debug "CONFIG_FILE: ${CONFIG_FILE}"
 if ! [ -e "$CONFIG_DIR/$CONFIG_FILE" ]; then
-    echo "Folder contains no devcontainer configuration"
-    exit
+    # Config file may also be ".devcontainer.json" on the project folder.
+    CONFIG_DIR=.
+    debug "CONFIG_DIR: ${CONFIG_DIR}"
+    CONFIG_FILE=.devcontainer.json
+    debug "CONFIG_FILE: ${CONFIG_FILE}"
+    if ! [ -e "$CONFIG_DIR/$CONFIG_FILE" ]; then
+        echo "Folder contains no devcontainer configuration"
+        exit
+    fi
 fi
 
 CONFIG=$(cat $CONFIG_DIR/$CONFIG_FILE | grep -v //)
