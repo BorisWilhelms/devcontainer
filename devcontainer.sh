@@ -83,7 +83,8 @@ WORK_DIR=$(echo "$TARGET_PROJECT_ROOT${PWD#"$PROJECT_ROOT"}")
 debug "WORK_DIR: ${WORK_DIR}"
 
 echo "Building and starting container"
-DOCKER_IMAGE_HASH=$(docker build -f $DOCKER_FILE $ARGS .)
+DOCKER_BUILD_OUTPUT=$(docker build -f $DOCKER_FILE $ARGS .)
+DOCKER_IMAGE_HASH=$(echo $DOCKER_BUILD_OUTPUT | awk '/Successfully built/{print $NF}')
 debug "DOCKER_IMAGE_HASH: ${DOCKER_IMAGE_HASH}"
 
 docker run -it $REMOTE_USER $PORTS $ENVS $MOUNT -w $WORK_DIR $DOCKER_IMAGE_HASH $SHELL
