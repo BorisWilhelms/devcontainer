@@ -19,17 +19,24 @@ debug() {
     fi
 }
 
-WORKSPACE=${1:-`pwd`}
+PROJECT_ROOT=$(git rev-parse --show-toplevel)
 CURRENT_DIR=${PWD##*/}
-echo "Using workspace ${WORKSPACE}"
+echo "Using workspace ${PROJECT_ROOT}"
 
 CONFIG_DIR=./.devcontainer
 debug "CONFIG_DIR: ${CONFIG_DIR}"
 CONFIG_FILE=devcontainer.json
 debug "CONFIG_FILE: ${CONFIG_FILE}"
 if ! [ -e "$CONFIG_DIR/$CONFIG_FILE" ]; then
-    echo "Folder contains no devcontainer configuration"
-    exit
+    # Config file may also be ".devcontainer.json" on the project folder.
+    CONFIG_DIR=.
+    debug "CONFIG_DIR: ${CONFIG_DIR}"
+    CONFIG_FILE=.devcontainer.json
+    debug "CONFIG_FILE: ${CONFIG_FILE}"
+    if ! [ -e "$CONFIG_DIR/$CONFIG_FILE" ]; then
+        echo "Folder contains no devcontainer configuration"
+        exit
+    fi
 fi
 
 CONFIG=$(cat $CONFIG_DIR/$CONFIG_FILE | grep -v //)
@@ -66,14 +73,18 @@ debug "PORTS: ${PORTS}"
 ENVS=$(echo $CONFIG | jq -r '.remoteEnv | to_entries? | map("-e \(.key)=\(.value)")? | join(" ")')
 debug "ENVS: ${ENVS}"
 
-WORK_DIR="/workspace"
+TARGET_PROJECT_ROOT="/workspace/$(basename $PROJECT_ROOT)"
 debug "WORK_DIR: ${WORK_DIR}"
 
-MOUNT="${MOUNT} --mount type=bind,source=${WORKSPACE},target=${WORK_DIR}"
-debug "MOUNT: ${MOUNT}"
+MOUNT="${MOUNT} --mount type=bind,source=${PROJECT_ROOT},target=${TARGET_PROJECT_ROOT}"
+debug "MOUNT: ${TARGET_PROJECT_ROOT}"
+
+WORK_DIR=$(echo "$TARGET_PROJECT_ROOT${PWD#"$PROJECT_ROOT"}")
+debug "WORK_DIR: ${WORK_DIR}"
 
 echo "Building and starting container"
-DOCKER_IMAGE_HASH=$(docker build -f $DOCKER_FILE $ARGS .)
+DOCKER_BUILD_OUTPUT=$(docker build -f $DOCKER_FILE $ARGS .)
+DOCKER_IMAGE_HASH=$(echo $DOCKER_BUILD_OUTPUT | awk '/Successfully built/{print $NF}')
 debug "DOCKER_IMAGE_HASH: ${DOCKER_IMAGE_HASH}"
 
 docker run -it $REMOTE_USER $PORTS $ENVS $MOUNT -w $WORK_DIR $DOCKER_IMAGE_HASH $SHELL
